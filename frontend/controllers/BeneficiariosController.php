@@ -7,9 +7,11 @@ use Yii;
 use common\models\Beneficiarios;
 use common\models\BeneficiariosSearch;
 use yii\data\ActiveDataProvider;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use common\models\User as Usuarios;
 
 /**
  * BeneficiariosController implements the CRUD actions for Beneficiarios model.
@@ -22,6 +24,21 @@ class BeneficiariosController extends Controller
     public function behaviors()
     {
         return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['index', 'entrega'],
+                'rules' => [
+                    [
+                        'actions' => ['index', 'entrega'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                        'matchCallback' => function ($rule, $action) {
+                            $valid_roles = [Usuarios::ROLE_ADMIN, Usuarios::ROLE_SUP];
+                            return Usuarios::roleInArray($valid_roles);
+                        }
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -45,7 +62,6 @@ class BeneficiariosController extends Controller
             $dataProvider = new ActiveDataProvider([
                 'query' => $query,
             ]);
-
         }
 
         return $this->render('index', [
@@ -62,6 +78,7 @@ class BeneficiariosController extends Controller
      */
     public function actionView($id)
     {
+        die;
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -74,6 +91,7 @@ class BeneficiariosController extends Controller
      */
     public function actionCreate()
     {
+        die;
         $model = new Beneficiarios();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -87,6 +105,7 @@ class BeneficiariosController extends Controller
 
     public function actionUpdate($id)
     {
+        die;
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -100,6 +119,7 @@ class BeneficiariosController extends Controller
 
     public function actionDelete($id)
     {
+        die;
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
@@ -110,7 +130,7 @@ class BeneficiariosController extends Controller
         $fecha1 = Yii::$app->formatter->asDatetime('now', 'yyyy-MM-dd');
         $fecha2 =  Yii::$app->formatter->asDatetime('now','yyyy-MM-dd H:mm:ss');
         if($beneficiario){
-            $entrega = Entregas::find()->where(['FOLIO' => $id, 'fecha' => $fecha1])->one();
+            $entrega = Entregas::find()->where(['FOLIO' => $id, 'status_canasta' => 1])->one();
             if($entrega){
                 if ($entrega->load(Yii::$app->request->post())) {
                     $entrega->updated_at = $fecha2;
@@ -134,6 +154,7 @@ class BeneficiariosController extends Controller
                     $model->updated_at = $fecha2;
 
                     if($model->save()){
+                        Yii::$app->session->setFlash('success', 'Entrega Realizada Correctamente');
                         return $this->redirect(['index']);
                     }
 

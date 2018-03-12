@@ -3,18 +3,18 @@
 namespace frontend\controllers;
 
 use Yii;
-use common\models\Programas;
-use common\models\ProgramasSearch;
+use common\models\User as Usuarios;
+use frontend\models\User;
+use frontend\models\UserSearch;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use common\models\User as Usuarios;
 
 /**
- * ProgramasController implements the CRUD actions for Programas model.
+ * UserController implements the CRUD actions for User model.
  */
-class ProgramasController extends Controller
+class UserController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -31,7 +31,7 @@ class ProgramasController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            $valid_roles = [Usuarios::ROLE_ADMIN];
+                            $valid_roles = [Usuarios::ROLE_ADMIN, Usuarios::ROLE_SUP];
                             return Usuarios::roleInArray($valid_roles);
                         }
                     ],
@@ -40,19 +40,15 @@ class ProgramasController extends Controller
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'delete' => ['POST'],
+                    'delete' => ['GET'],
                 ],
             ],
         ];
     }
 
-    /**
-     * Lists all Programas models.
-     * @return mixed
-     */
     public function actionIndex()
     {
-        $searchModel = new ProgramasSearch();
+        $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -61,30 +57,28 @@ class ProgramasController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single Programas model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+
     public function actionView($id)
     {
+        die;
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
     }
 
-    /**
-     * Creates a new Programas model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
     public function actionCreate()
     {
-        $model = new Programas();
+        $model = new User();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $password = Yii::$app->request->post()['User']["password_hash"];
+            $model->password_hash = Yii::$app
+                ->security
+                ->generatePasswordHash($password);
+            $model->status = 10;
+            if($model->save()){
+                return $this->redirect(['index']);
+            }
         }
 
         return $this->render('create', [
@@ -92,19 +86,23 @@ class ProgramasController extends Controller
         ]);
     }
 
-    /**
-     * Updates an existing Programas model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $password = Yii::$app->request->post()['User']["password_hash"];
+            if(!empty($password)) {
+                $model->password_hash = Yii::$app
+                    ->security
+                    ->generatePasswordHash($password);
+            }
+            else{
+                $model->password_hash = $model->password_hash;
+            }
+            if($model->save()) {
+                return $this->redirect(['index']);
+            }
         }
 
         return $this->render('update', [
@@ -112,13 +110,6 @@ class ProgramasController extends Controller
         ]);
     }
 
-    /**
-     * Deletes an existing Programas model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -127,15 +118,15 @@ class ProgramasController extends Controller
     }
 
     /**
-     * Finds the Programas model based on its primary key value.
+     * Finds the User model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Programas the loaded model
+     * @return User the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Programas::findOne($id)) !== null) {
+        if (($model = User::findOne($id)) !== null) {
             return $model;
         }
 

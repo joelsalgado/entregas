@@ -11,14 +11,14 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\Beneficiarios */
 
-$this->title = 'Actualizar Entrega: ' . $model->FOLIO;
+$this->title = 'Canasta Entrgada';
 ?>
-<div class="beneficiarios-update">
+<div class="beneficiarios-entregados">
 
+    <div class="alert alert-danger">
+        <strong>Canasta entregada!</strong> Esta Canasta ya se entrego al beneficiario!
+    </div
 
-
-    <?= $this->render('_form_entrega', [
-        'model' => $model,
-    ]) ?>
+    <p><?= Html::a('Regresar', ['index'], ['class' => 'btn btn-success btn-lg']) ?></p>
 
 </div>

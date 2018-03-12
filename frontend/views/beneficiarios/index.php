@@ -15,10 +15,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
+    <div class="table-responsive">
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'summary' => "Mostrando {begin}-{end} de {totalCount} Elementos",
+        'emptyText' => "No se encontró ningún elemento",
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
@@ -56,5 +58,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+    </div>
     <?php Pjax::end(); ?>
 </div>

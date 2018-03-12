@@ -57,4 +57,23 @@ class Programas extends \yii\db\ActiveRecord
     {
         return $this->hasMany(User::className(), ['prog_id' => 'prog_id']);
     }
+
+    public static function getProgramasOk(){
+        if(Yii::$app->user->identity->role == 30){
+            $programas_activos = self::find()
+                ->select(['prog_id', 'prog_desc'])
+                ->where(['status' => 10])
+                ->orderBy(['prog_desc' => 'DESC'])
+                ->all();
+        }else{
+            $programas_activos = self::find()
+                ->select(['prog_id', 'prog_desc'])
+                ->where(['status' => 10])
+                ->andWhere(['prog_id' => Yii::$app->user->identity->prog_id ])
+                ->orderBy(['prog_desc' => 'DESC'])
+                ->all();
+        }
+
+        return $programas_activos;
+    }
 }
